@@ -10,19 +10,34 @@ declare(strict_types=1);
  */
 namespace Huangdijia\Ssdb;
 
+use Huangdijia\Ssdb\Exceptions\SSDBException;
+
 class Response
 {
+    /**
+     * @var string
+     */
     public $cmd;
 
+    /**
+     * @var string
+     */
     public $code;
 
+    /**
+     * @var mixed
+     */
     public $data;
 
+    /**
+     * @var string
+     */
     public $message;
 
     public function __construct($code = 'ok', $data_or_message = null)
     {
         $this->code = $code;
+
         if ($code == 'ok') {
             $this->data = $data_or_message;
         } else {
@@ -38,6 +53,15 @@ class Response
             $s = $this->message;
         }
         return sprintf('%-13s %12s %s', $this->cmd, $this->code, $s);
+    }
+
+    public function throw()
+    {
+        if (! $this->ok() && ! $this->not_found()) {
+            throw new SSDBException($this->message);
+        }
+
+        return $this;
     }
 
     public function ok()
